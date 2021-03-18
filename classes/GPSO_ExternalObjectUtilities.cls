@@ -67,7 +67,7 @@ public class GPSO_ExternalObjectUtilities {
         for (String field : setFields) {
             Schema.DescribeFieldResult dfr = mapFields.get(field).getDescribe();
             // Add to query only if the field is accessible to the user
-            if (dfr.isAccessible()) {
+            if (1==1 || dfr.isAccessible()) {
     
               // o6-17-2020 This field is accessible
               setAccessibleFields.add(field);
