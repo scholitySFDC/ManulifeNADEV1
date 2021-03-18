@@ -5,7 +5,9 @@
                 object-api-name={objectApiName}--> 
                 <template if:true={sectionsAndFields}>
                     <template for:each={sectionsAndFields} for:item="sec">
-                        <b key={sec.secNumber}>{sec.name}</b>
+                        <h3 class="test-id__section-header-container slds-section__title">
+                             <b key={sec.secNumber}>{sec.name}</b>
+                        </h3>
                         <template for:each={sec.fields} for:item="fld">
                             <div key={fld.fldNumber} class="slds-grid">
                                 <div key={fld.fldNumber} class="slds-col slds-size_1-of-2">
