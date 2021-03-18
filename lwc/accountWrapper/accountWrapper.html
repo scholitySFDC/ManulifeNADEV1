@@ -1,0 +1,42 @@
+<template>
+            <!--template if:true={account.data}-->
+                <!--lightning-record-view-form
+                record-id={recordId}  
+                object-api-name={objectApiName}--> 
+                <template if:true={sectionsAndFields}>
+                    <template for:each={sectionsAndFields} for:item="sec">
+                        <b key={sec.secNumber}>{sec.name}</b>
+                        <template for:each={sec.fields} for:item="fld">
+                            <div key={fld.fldNumber} class="slds-grid">
+                                <div key={fld.fldNumber} class="slds-col slds-size_1-of-2">
+                                    <div class="slds-var-m-around_medium">
+                                        {fld.label}
+                                    </div>
+                                </div>
+                                <div key={fld.fldNumber} class="slds-col slds-size_1-of-2">
+                                    <div class="slds-var-m-around_medium">
+                                        {fld.value}
+                                    </div> 
+                                </div>
+                            </div>
+                        </template> 
+                    </template>
+                </template>
+                <!--
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_1-of-2">
+                        <div class="slds-var-m-around_medium">{name}</div>
+                        <lightning-output-field field-name="Name"></lightning-output-field>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <div class="slds-m-around_medium">{billingstreet}</div>
+                        <lightning-output-field field-name="Phone"></lightning-output-field>
+                    </div> 
+                </div>
+                -->
+                <!--/lightning-record-view-form-->
+            <!--/template-->
+            <!--template if:true={account.error}>
+                <c-error-panel errors={account.error}></c-error-panel>
+            </template-->
+    </template>
