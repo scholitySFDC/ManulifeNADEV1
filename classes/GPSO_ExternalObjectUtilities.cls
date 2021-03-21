@@ -19,6 +19,9 @@ public class GPSO_ExternalObjectUtilities {
      */ 
     @AuraEnabled
     public static List<Section> getsObjectFields(ID recordId) {
+        // The list of sections to return
+        List<Section> listSections = new List<Section>();
+
         //
         // get Layout name for the Current User using Tooling API
         String sObjectName = '';
@@ -26,10 +29,15 @@ public class GPSO_ExternalObjectUtilities {
         //String pageLayout = getLayoutUsingPageAssignments(recordId);
         System.debug('pageLayout: ' + pageLayout);
         List<Metadata.Metadata> components =
-            Metadata.Operations.retrieve(Metadata.MetadataType.Layout, new String[]{pageLayout });
+            Metadata.Operations.retrieve(Metadata.MetadataType.Layout, new String[]{pageLayout});
     
+        if (components.size() < 1) {
+            // Return empty list of sections (no such page layout OR page layout name not mapped to record id)
+            return listSections;
+        }
+
         Metadata.Layout layout = (Metadata.Layout) components.get(0);
-    
+
         // Get the fields in each section of the layout in a Set.
         Set<String> setFields = new Set<String>();
         if (layout.layoutSections != null) {
@@ -99,7 +107,6 @@ public class GPSO_ExternalObjectUtilities {
     
     
         // The list of Sections to return.
-        List<Section> listSections = new List<Section>();
         Integer secNumber = 0;
         Integer fldNumber = 0;
     
