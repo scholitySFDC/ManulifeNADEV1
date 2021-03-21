@@ -195,7 +195,7 @@ public class GPSO_ExternalObjectUtilities {
         sObjectName = recordId.getSObjectType().getDescribe().getName();  
         if (String.isNotBlank(sObjectName)) {
             sObject theRecord = [SELECT RecordTypeId__c FROM :sObjectName WHERE Id = :recordId LIMIT 1];
-            if (theRecord != null && String.isNotBlank(theRecord.get('RecordTypeId__c'))) {
+            if (theRecord != null && String.isNotBlank((String)theRecord.get('RecordTypeId__c'))) {
                 String recordTypeId = (String)theRecord.get('RecordTypeId__c');
                 // Get the record type name to be used for page layout lookup (assumes record type name == page layout name)
                 if (String.isNotBlank(recordTypeId)) {
@@ -207,7 +207,7 @@ public class GPSO_ExternalObjectUtilities {
                 }
             }
         }
-        if (String.isNotBlank(recordTypeName) pageLayout = recordTypeName;
+        if (String.isNotBlank(recordTypeName)) pageLayout = recordTypeName;
         return pageLayout;
     }
 
@@ -226,7 +226,7 @@ public class GPSO_ExternalObjectUtilities {
         sObjectName = recordId.getSObjectType().getDescribe().getName();  
         if (String.isNotBlank(sObjectName)) {
             sObject theRecord = [SELECT RecordType.Id FROM :sObjectName WHERE Id = :recordId LIMIT 1];
-            if (theRecord != null && String.isNotBlank(theRecord.get('RecordTypeId__c'))) {
+            if (theRecord != null && String.isNotBlank((String)theRecord.get('RecordTypeId__c'))) {
                 recordTypeId = (String)theRecord.get('RecordType.Id');
             }
         }
