@@ -212,7 +212,7 @@ public class GPSO_ExternalObjectUtilities {
         if (String.isBlank(pageLayoutName)) {
             pageLayoutName = 'Unknown';
         }
-        return pageLayout;
+        return pageLayoutName;
     }
 
     public static String getLayoutUsingPageAssignments(ID recordId) {
