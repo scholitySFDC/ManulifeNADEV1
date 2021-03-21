@@ -194,13 +194,13 @@ public class GPSO_ExternalObjectUtilities {
         // Get the record type id of the external record
         sObjectName = recordId.getSObjectType().getDescribe().getName();  
         if (String.isNotBlank(sObjectName)) {
-            sObject theRecord = [SELECT RecordTypeId__c FROM ' + sObjectName + ' WHERE Id = :recordId LIMIT 1];
+            sObject theRecord = [SELECT RecordTypeId__c FROM :sObjectName WHERE Id = :recordId LIMIT 1];
             if (theRecord != null && String.isNotBlank(theRecord.get('RecordTypeId__c'))) {
                 String recordTypeId = (String)theRecord.get('RecordTypeId__c');
                 // Get the record type name to be used for page layout lookup (assumes record type name == page layout name)
                 if (String.isNotBlank(recordTypeId)) {
                     List<SO_ExternalAccountRecordTypes__mdt> EART = [SELECT Record_Type_Id__c, Record_Type_Name__c FROM SO_ExternalAccountRecordTypes__mdt 
-                        WHERE Record_Type_Id__c := recordTypeId];
+                        WHERE Record_Type_Id__c = :recordTypeId];
                     if (EART.size() >= 1) {
                         recordTypeName = EART[0].Record_Type_Name__c;
                     }
@@ -225,7 +225,7 @@ public class GPSO_ExternalObjectUtilities {
         // Get the record type id of the external record
         sObjectName = recordId.getSObjectType().getDescribe().getName();  
         if (String.isNotBlank(sObjectName)) {
-            sObject theRecord = [SELECT RecordType.Id FROM ' + sObjectName + ' WHERE Id = :recordId LIMIT 1];
+            sObject theRecord = [SELECT RecordType.Id FROM :sObjectName WHERE Id = :recordId LIMIT 1];
             if (theRecord != null && String.isNotBlank(theRecord.get('RecordTypeId__c'))) {
                 recordTypeId = (String)theRecord.get('RecordType.Id');
             }
