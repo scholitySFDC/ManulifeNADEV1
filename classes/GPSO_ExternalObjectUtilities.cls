@@ -22,7 +22,8 @@ public class GPSO_ExternalObjectUtilities {
         //
         // get Layout name for the Current User using Tooling API
         String sObjectName = '';
-        String pageLayout = getLayoutUsingPageAssignments(recordId);
+        String pageLayout = getLayoutUsingRecordTypeName(recordId);
+        //String pageLayout = getLayoutUsingPageAssignments(recordId);
         System.debug('pageLayout: ' + pageLayout);
         List<Metadata.Metadata> components =
             Metadata.Operations.retrieve(Metadata.MetadataType.Layout, new String[]{pageLayout });
@@ -44,7 +45,7 @@ public class GPSO_ExternalObjectUtilities {
                       }
                   }
               }
-          }
+           }
         }
     
         // Get the map of all fields on Knowledge__kav
@@ -183,15 +184,53 @@ public class GPSO_ExternalObjectUtilities {
      *
      * @return String - The name of the Page Layout
      */
-     
+    
+    public static String getLayoutUsingRecordTypeName(ID recordId) {
+        String pageLayout = 'Unknown'; // externalAccountLayoutSetting.LayoutName__c;
+        String recordTypeName = '';
+        String sObjectId = '';
+        String sObjectName = '';
+    
+        // Get the record type id of the external record
+        sObjectName = recordId.getSObjectType().getDescribe().getName();  
+        if (String.isNotBlank(sObjectName)) {
+            sObject theRecord = [SELECT RecordTypeId__c FROM ' + sObjectName + ' WHERE Id = :recordId LIMIT 1];
+            if (theRecord != null && String.isNotBlank(theRecord.get('RecordTypeId__c'))) {
+                String recordTypeId = (String)theRecord.get('RecordTypeId__c');
+                // Get the record type name to be used for page layout lookup (assumes record type name == page layout name)
+                if (String.isNotBlank(recordTypeId)) {
+                    List<SO_ExternalAccountRecordTypes__mdt> EART = [SELECT Record_Type_Id__c, Record_Type_Name__c FROM SO_ExternalAccountRecordTypes__mdt 
+                        WHERE Record_Type_Id__c := recordTypeId];
+                    if (EART.size() >= 1) {
+                        recordTypeName = EART[0].Record_Type_Name__c;
+                    }
+                }
+            }
+        }
+        if (String.isNotBlank(recordTypeName) pageLayout = recordTypeName;
+        return pageLayout;
+    }
+
     public static String getLayoutUsingPageAssignments(ID recordId) {
     
         // Get default layout name from metadata ExternalAccountLayoutSetting__mdt (LayoutName__c)
         //ExternalAccountLayoutSetting__mdt externalAccountLayoutSetting = [SELECT LayoutName__c FROM ExternalAccountLayoutSetting__mdt LIMIT 1];
-        String pageLayout = 'Account Layout'; // externalAccountLayoutSetting.LayoutName__c;
+        String pageLayout = 'Unknown'; // externalAccountLayoutSetting.LayoutName__c;
+        String recordTypeName = '';
+        String recordTypeId = '';
         String sObjectId = '';
         String sObjectName = '';
+        String query = '';
     
+        // Get the record type id of the external record
+        sObjectName = recordId.getSObjectType().getDescribe().getName();  
+        if (String.isNotBlank(sObjectName)) {
+            sObject theRecord = [SELECT RecordType.Id FROM ' + sObjectName + ' WHERE Id = :recordId LIMIT 1];
+            if (theRecord != null && String.isNotBlank(theRecord.get('RecordTypeId__c'))) {
+                recordTypeId = (String)theRecord.get('RecordType.Id');
+            }
+        }
+
         // Get the record type id of the record.
         //Account theAccount = [SELECT Id, RecordType.Id FROM Account WHERE Id = :recordId];
         //String recordTypeId = theAccount.RecordType.Id;
@@ -202,6 +241,11 @@ public class GPSO_ExternalObjectUtilities {
         // Retrieve Object Id via Object Name
         //
         // 03-17-2021 - SJC - Workaround for getSobjectType() returning error for external record ids of the form 'x0N-----------'
+        // Note: In early development an external object record Id of the form 'x0N-------' was returning the standard
+        // object rather than the external object's type via getSObjectType().  In recent testing this is now working (returns
+        // external object type)).
+        // 
+        /*
         if (String.isNotBlank(recordId) && String.valueOf(recordId).length() >= 15) {
             if (String.valueOf(recordId).startsWithIgnoreCase('x01')) {
                 sObjectName = 'ExternalAccount__x';
@@ -209,22 +253,27 @@ public class GPSO_ExternalObjectUtilities {
                 sObjectName = recordId.getSObjectType().getDescribe().getName();  
             }
         }
+        */
         system.debug('>>>'+sObjectName);
         
+        // Get the internal Id for this sObjectName (so-called DurableId)
         List<EntityDefinition> theEntityDefinition = [SELECT DurableId FROM EntityDefinition WHERE QualifiedApiName = :sObjectName];
         if (theEntityDefinition.size() >= 1) {
             sObjectId = theEntityDefinition[0].DurableId;
         }
         system.debug('==='+sObjectId);
         
-        // Query to retrieve the current users page layout (external or custom objects).
-        String query = 'SELECT Layout.FullName FROM ProfileLayout WHERE TableEnumOrId = \'' + sObjectId + '\' AND ProfileId = \'' + profileId + '\'';
-        // Query to retrieve the current users page layout (standard objects).
-        //String query = 'SELECT Layout.FullName FROM ProfileLayout WHERE RecordTypeId = \'' + recordTypeId + '\' AND ProfileId = \'' + profileId + '\'';
-   
-        String endpoint = 'callout:SFDCToolingAPI/services/data/v50.0/tooling/query?q=' + EncodingUtil.urlEncode(query, 'UTF-8');
+        if (String.isBlank(recordTypeId)) {
+            // Query to retrieve the current users page layout (external or custom objects with no defined record types).
+            query = 'SELECT Layout.FullName FROM ProfileLayout WHERE TableEnumOrId = \'' + sObjectId + '\' AND ProfileId = \'' + profileId + '\'';
+        } else {
+            // Query to retrieve the current users page layout (custom or standard objects with record types defined).
+            query = 'SELECT Layout.FullName FROM ProfileLayout WHERE RecordTypeId = \'' + recordTypeId + '\' AND ProfileId = \'' + profileId + '\'';
+        }
 
+        String endpoint = 'callout:SFDCToolingAPI/services/data/v50.0/tooling/query?q=' + EncodingUtil.urlEncode(query, 'UTF-8');
         //String endpoint = URL.getSalesforceBaseUrl().toExternalForm() + '/services/data/v50.0/tooling/query/?q=' + EncodingUtil.urlEncode(query, 'UTF-8');
+        
         System.debug('Tooling API Endpoint: ' + endpoint);
         System.debug('Tooling API Session: ' + UserInfo.getSessionID().substring(15));
         HttpRequest req = new HttpRequest();
