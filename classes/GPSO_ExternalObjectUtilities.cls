@@ -22,17 +22,20 @@ public class GPSO_ExternalObjectUtilities {
         // The list of sections to return
         List<Section> listSections = new List<Section>();
 
-        //
-        // get Layout name for the Current User using Tooling API
+        // Get page layout name for the Current User using Tooling API
         String sObjectName = '';
         String pageLayout = getLayoutUsingRecordTypeName(recordId);
         //String pageLayout = getLayoutUsingPageAssignments(recordId);
         System.debug('pageLayout: ' + pageLayout);
+
         List<Metadata.Metadata> components =
             Metadata.Operations.retrieve(Metadata.MetadataType.Layout, new String[]{pageLayout});
     
         if (components.size() < 1) {
             // Return empty list of sections (no such page layout OR page layout name not mapped to record id)
+            Section errorSection = new Section('No page layout found for current record type', 1);
+            listSections.add(errorSection);
+            errorSection.fields.add(new Field('Record Id='+recordId, 1, '', '', ''));              
             return listSections;
         }
 
@@ -56,16 +59,18 @@ public class GPSO_ExternalObjectUtilities {
            }
         }
     
-        // Get the map of all fields on Knowledge__kav
-        //Map<String, Schema.SObjectField> mapFields = Schema.sObjectType.Knowledge__kav.fields.getMap();
+        // Workaround for retreiving sObject name when getSObjectType() returns standard object name with 'x0Nxxxxxx' record Id
+        // Currently this does not seem to be required - 'x0Nxxxxxx' record Ids are corretly returning external API sObject names
+        /*
         if (String.isNotBlank(recordId) && String.valueOf(recordId).length() >= 15) {
             if (String.valueOf(recordId).startsWithIgnoreCase('x01')) {
                 sObjectName = 'ExternalAccount__x';
             } else {  
                 sObjectName = recordId.getSObjectType().getDescribe().getName();  
             }
-        }        
-        //String externalsObjectName = recordId.getSObjectType().getDescribe().getName();        
+        }*/
+
+        sObjectName = recordId.getSObjectType().getDescribe().getName();        
         Map<String,Schema.SObjectField> mapFields = Schema.getGlobalDescribe().get(sObjectName).getDescribe().fields.getMap();        
     
         // Collect fields that are accessible
@@ -76,7 +81,7 @@ public class GPSO_ExternalObjectUtilities {
         for (String field : setFields) {
             Schema.DescribeFieldResult dfr = mapFields.get(field).getDescribe();
             // Add to query only if the field is accessible to the user
-            if (1==1 || dfr.isAccessible()) {
+            if (dfr.isAccessible()) {
     
               // o6-17-2020 This field is accessible
               setAccessibleFields.add(field);
