@@ -33,9 +33,10 @@ public class GPSO_ExternalObjectUtilities {
     
         if (components.size() < 1) {
             // Return empty list of sections (no such page layout OR page layout name not mapped to record id)
-            Section errorSection = new Section('No page layout found for current record type', 1);
+            Section errorSection = new Section('No page layout found or mapped to the current record type', 1);
             listSections.add(errorSection);
             errorSection.fields.add(new Field('Record Id='+recordId, 1, '', '', ''));              
+            errorSection.fields.add(new Field('Record Type/Page Layout Name='+pageLayout, 2, '', '', ''));    
             return listSections;
         }
 
