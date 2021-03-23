@@ -1,7 +1,7 @@
 // accountWrapper.js
 import { LightningElement, api, wire, track } from 'lwc';
 import { getRecord } from 'lightning/uiRecordApi';
-import getExternalAccount from '@salesforce/apex/GPSO_AccountUtil.getExternalAccount';
+//import getExternalAccount from '@salesforce/apex/GPSO_AccountUtil.getExternalAccount';
 import getSectionsAndFields from '@salesforce/apex/GPSO_ExternalObjectUtilities.getsObjectFields';
 
 const FIELDS = [
@@ -34,11 +34,13 @@ export default class AccountWrapper extends LightningElement {
             .then(result => {
                 this.sectionsAndFields = result;
             })
+            /*
             getExternalAccount ({accountId: this.externalAccountId})
             .then(result => {
                 this.externalAccount = result; 
                 this.extAcct = JSON.parse(JSON.stringify(this.externalAccount));
             })
+            */
         }
     }
 
